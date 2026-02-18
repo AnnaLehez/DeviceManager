@@ -110,6 +110,7 @@ class DeviceControllerTest {
     @DisplayName("Should get device by ID")
     void shouldGetDeviceById() {
         String id = createDevice("Device to Find", "Brand X", DeviceState.AVAILABLE);
+        createDevice("Device 1", "Brand X", DeviceState.AVAILABLE);
 
         given()
                 .contentType(ContentType.JSON)

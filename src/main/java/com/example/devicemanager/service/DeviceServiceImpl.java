@@ -9,6 +9,7 @@ import com.example.devicemanager.exception.InvalidDeviceStateException;
 import com.example.devicemanager.mapper.DeviceMapper;
 import com.example.devicemanager.repository.DeviceRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -91,9 +92,14 @@ public class DeviceServiceImpl implements DeviceService {
 
         deviceMapper.updateEntityFromDTO(deviceUpdateDTO, existingDevice);
 
-        Device updatedDevice = deviceRepository.save(existingDevice);
-        log.info("Device with ID: {} updated successfully", id);
-        return deviceMapper.toDTO(updatedDevice);
+        try {
+            Device updatedDevice = deviceRepository.save(existingDevice);
+            log.info("Device with ID: {} updated successfully", id);
+            return deviceMapper.toDTO(updatedDevice);
+        } catch (OptimisticLockException e) {
+            log.error("Optimistic lock exception while updating device with ID: {}", id);
+            throw e;
+        }
     }
 
     @Override

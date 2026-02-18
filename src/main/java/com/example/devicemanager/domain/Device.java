@@ -38,6 +38,10 @@ public class Device {
     @Setter(AccessLevel.NONE)
     private LocalDateTime creationTime;
 
+    @Version
+    @Setter(AccessLevel.NONE)
+    private Long version;
+
     public Device(String name, String brand, DeviceState state) {
         this.name = name;
         this.brand = brand;

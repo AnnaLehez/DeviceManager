@@ -2,6 +2,7 @@ package com.example.devicemanager.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -26,6 +27,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(OptimisticLockException.class)
+    public ResponseEntity<String> handleOptimisticLockException(OptimisticLockException ex) {
+        return new ResponseEntity<>("The device was updated by another transaction. Please refresh and try again.", HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -46,6 +52,6 @@ public class GlobalExceptionHandler {
 
         body.put("message", defaultMessage);
 
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }

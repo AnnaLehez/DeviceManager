@@ -3,8 +3,10 @@ package com.example.devicemanager.service;
 import com.example.devicemanager.domain.Device;
 import com.example.devicemanager.domain.DeviceState;
 import com.example.devicemanager.dto.DeviceCreateDTO;
+import com.example.devicemanager.dto.DeviceResponseDTO;
 import com.example.devicemanager.dto.DeviceUpdateDTO;
 import com.example.devicemanager.exception.InvalidDeviceStateException;
+import com.example.devicemanager.mapper.DeviceMapper;
 import com.example.devicemanager.repository.DeviceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,58 +24,59 @@ import java.util.UUID;
 public class DeviceServiceImpl implements DeviceService {
 
     private final DeviceRepository deviceRepository;
+    private final DeviceMapper deviceMapper;
 
     @Override
     @Transactional
-    public Device createDevice(DeviceCreateDTO deviceCreateDTO) {
+    public DeviceResponseDTO createDevice(DeviceCreateDTO deviceCreateDTO) {
         log.debug("Creating new device with name: {} and brand: {}", deviceCreateDTO.name(), deviceCreateDTO.brand());
-        Device device = new Device(deviceCreateDTO.name(), deviceCreateDTO.brand(), deviceCreateDTO.state());
-        if (deviceCreateDTO.state() != null) {
-            device.setState(deviceCreateDTO.state());
-        }
+        Device device = deviceMapper.toEntity(deviceCreateDTO);
         Device savedDevice = deviceRepository.save(device);
         log.info("Device created successfully with ID: {}", savedDevice.getId());
 
-        return savedDevice;
+        return deviceMapper.toDTO(savedDevice);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Device> getAllDevices() {
+    public List<DeviceResponseDTO> getAllDevices() {
         log.debug("Fetching all devices");
-        return deviceRepository.findAll();
+        return deviceRepository.findAll().stream()
+                .map(deviceMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Device getDeviceById(UUID id) {
+    public DeviceResponseDTO getDeviceById(UUID id) {
         log.debug("Fetching device with ID: {}", id);
-        return deviceRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Device not found with ID: {}", id);
-                    return new EntityNotFoundException("Device not found with id: " + id);
-                });
+        Device device = findDeviceById(id);
+        return deviceMapper.toDTO(device);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Device> getDevicesByBrand(String brand) {
+    public List<DeviceResponseDTO> getDevicesByBrand(String brand) {
         log.debug("Fetching devices with brand: {}", brand);
-        return deviceRepository.findByBrand(brand);
+        return deviceRepository.findByBrand(brand).stream()
+                .map(deviceMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Device> getDevicesByState(DeviceState state) {
+    public List<DeviceResponseDTO> getDevicesByState(DeviceState state) {
         log.debug("Fetching devices with state: {}", state);
-        return deviceRepository.findByState(state);
+        return deviceRepository.findByState(state).stream()
+                .map(deviceMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public Device updateDevice(UUID id, DeviceUpdateDTO deviceUpdateDTO) {
+    public DeviceResponseDTO updateDevice(UUID id, DeviceUpdateDTO deviceUpdateDTO) {
         log.debug("Updating device with ID: {} with payload: {}", id, deviceUpdateDTO);
-        Device existingDevice = getDeviceById(id);
+        Device existingDevice = findDeviceById(id);
 
         if (existingDevice.getState() == DeviceState.IN_USE) {
             if (deviceUpdateDTO.name() != null && !existingDevice.getName().equals(deviceUpdateDTO.name())) {
@@ -85,31 +89,31 @@ public class DeviceServiceImpl implements DeviceService {
             }
         }
 
-        if (deviceUpdateDTO.name() != null) {
-            existingDevice.setName(deviceUpdateDTO.name());
-        }
-        if (deviceUpdateDTO.brand() != null) {
-            existingDevice.setBrand(deviceUpdateDTO.brand());
-        }
-        if (deviceUpdateDTO.state() != null) {
-            existingDevice.setState(deviceUpdateDTO.state());
-        }
+        deviceMapper.updateEntityFromDTO(deviceUpdateDTO, existingDevice);
 
         Device updatedDevice = deviceRepository.save(existingDevice);
         log.info("Device with ID: {} updated successfully", id);
-        return updatedDevice;
+        return deviceMapper.toDTO(updatedDevice);
     }
 
     @Override
     @Transactional
     public void deleteDevice(UUID id) {
         log.debug("Deleting device with ID: {}", id);
-        Device device = getDeviceById(id);
+        Device device = findDeviceById(id);
         if (device.getState() == DeviceState.IN_USE) {
             log.warn("Attempt to delete IN_USE device with ID: {}", id);
             throw new InvalidDeviceStateException("Cannot delete device when it is IN_USE");
         }
         deviceRepository.delete(device);
         log.info("Device with ID: {} deleted successfully", id);
+    }
+
+    private Device findDeviceById(UUID id) {
+        return deviceRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Device not found with ID: {}", id);
+                    return new EntityNotFoundException("Device not found with id: " + id);
+                });
     }
 }

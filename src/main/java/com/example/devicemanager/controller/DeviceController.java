@@ -1,8 +1,8 @@
 package com.example.devicemanager.controller;
 
-import com.example.devicemanager.domain.Device;
 import com.example.devicemanager.domain.DeviceState;
 import com.example.devicemanager.dto.DeviceCreateDTO;
+import com.example.devicemanager.dto.DeviceResponseDTO;
 import com.example.devicemanager.dto.DeviceUpdateDTO;
 import com.example.devicemanager.service.DeviceService;
 import jakarta.validation.Valid;
@@ -25,19 +25,19 @@ public class DeviceController {
     private final DeviceService deviceService;
 
     @PostMapping
-    public ResponseEntity<Device> createDevice(@Valid @RequestBody DeviceCreateDTO deviceCreateDTO) {
+    public ResponseEntity<DeviceResponseDTO> createDevice(@Valid @RequestBody DeviceCreateDTO deviceCreateDTO) {
         log.debug("Received request to create device: {}", deviceCreateDTO);
-        Device createdDevice = deviceService.createDevice(deviceCreateDTO);
+        DeviceResponseDTO createdDevice = deviceService.createDevice(deviceCreateDTO);
         return new ResponseEntity<>(createdDevice, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Device>> getAllDevices(
+    public ResponseEntity<List<DeviceResponseDTO>> getAllDevices(
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) DeviceState state) {
         log.debug("Received request to fetch devices. Brand: {}, State: {}", brand, state);
 
-        List<Device> devices;
+        List<DeviceResponseDTO> devices;
 
         if (brand != null) {
             devices = deviceService.getDevicesByBrand(brand);
@@ -51,18 +51,18 @@ public class DeviceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Device> getDeviceById(@PathVariable UUID id) {
+    public ResponseEntity<DeviceResponseDTO> getDeviceById(@PathVariable UUID id) {
         log.debug("Received request to fetch device with ID: {}", id);
-        Device device = deviceService.getDeviceById(id);
+        DeviceResponseDTO device = deviceService.getDeviceById(id);
         return ResponseEntity.ok(device);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Device> updateDevice(
+    public ResponseEntity<DeviceResponseDTO> updateDevice(
             @PathVariable UUID id,
             @Valid @RequestBody DeviceUpdateDTO deviceUpdateDTO) {
         log.debug("Received request to update device with ID: {}", id);
-        Device updatedDevice = deviceService.updateDevice(id, deviceUpdateDTO);
+        DeviceResponseDTO updatedDevice = deviceService.updateDevice(id, deviceUpdateDTO);
         return ResponseEntity.ok(updatedDevice);
     }
 

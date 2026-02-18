@@ -3,18 +3,22 @@ package com.example.devicemanager.service;
 import com.example.devicemanager.domain.Device;
 import com.example.devicemanager.domain.DeviceState;
 import com.example.devicemanager.dto.DeviceCreateDTO;
+import com.example.devicemanager.dto.DeviceResponseDTO;
 import com.example.devicemanager.dto.DeviceUpdateDTO;
 import com.example.devicemanager.exception.InvalidDeviceStateException;
+import com.example.devicemanager.mapper.DeviceMapper;
 import com.example.devicemanager.repository.DeviceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -33,6 +37,9 @@ class DeviceServiceImplTest {
 
     @Mock
     private DeviceRepository deviceRepository;
+
+    @Spy
+    private DeviceMapper deviceMapper = Mappers.getMapper(DeviceMapper.class);
 
     @InjectMocks
     private DeviceServiceImpl deviceService;
@@ -53,13 +60,13 @@ class DeviceServiceImplTest {
     }
 
     @Test
-    @DisplayName("Create device should save and return the device")
+    @DisplayName("Create device should save and return the device DTO")
     void createDevice_ShouldReturnSavedDevice() {
         // Given
         given(deviceRepository.save(any(Device.class))).willReturn(device);
 
         // When
-        Device createdDevice = deviceService.createDevice(deviceCreateDTO);
+        DeviceResponseDTO createdDevice = deviceService.createDevice(deviceCreateDTO);
 
         // Then
         then(deviceRepository).should().save(deviceCaptor.capture());
@@ -69,35 +76,38 @@ class DeviceServiceImplTest {
         assertThat(capturedDevice.getBrand()).isEqualTo(deviceCreateDTO.brand());
         assertThat(capturedDevice.getState()).isEqualTo(deviceCreateDTO.state());
 
-        assertThat(createdDevice).isEqualTo(device);
+        assertThat(createdDevice.name()).isEqualTo(device.getName());
+        assertThat(createdDevice.brand()).isEqualTo(device.getBrand());
+        assertThat(createdDevice.state()).isEqualTo(device.getState());
     }
 
     @Test
-    @DisplayName("Get all devices should return a list of devices")
+    @DisplayName("Get all devices should return a list of device DTOs")
     void getAllDevices_ShouldReturnListOfDevices() {
         // Given
         given(deviceRepository.findAll()).willReturn(List.of(device));
 
         // When
-        List<Device> devices = deviceService.getAllDevices();
+        List<DeviceResponseDTO> devices = deviceService.getAllDevices();
 
         // Then
         assertThat(devices).isNotEmpty().hasSize(1);
+        assertThat(devices.getFirst().name()).isEqualTo(device.getName());
         then(deviceRepository).should().findAll();
     }
 
     @Test
-    @DisplayName("Get device by ID should return device when found")
+    @DisplayName("Get device by ID should return device DTO when found")
     void getDeviceById_ShouldReturnDevice_WhenFound() {
         // Given
         given(deviceRepository.findById(deviceId)).willReturn(Optional.of(device));
 
         // When
-        Device foundDevice = deviceService.getDeviceById(deviceId);
+        DeviceResponseDTO foundDevice = deviceService.getDeviceById(deviceId);
 
         // Then
         assertThat(foundDevice).isNotNull();
-        assertThat(foundDevice).isEqualTo(device);
+        assertThat(foundDevice.name()).isEqualTo(device.getName());
         then(deviceRepository).should().findById(deviceId);
     }
 
@@ -116,34 +126,34 @@ class DeviceServiceImplTest {
     }
 
     @Test
-    @DisplayName("Get devices by brand should return list of devices")
+    @DisplayName("Get devices by brand should return list of device DTOs")
     void getDevicesByBrand_ShouldReturnListOfDevices() {
         // Given
         String brand = "Test Brand";
         given(deviceRepository.findByBrand(brand)).willReturn(List.of(device));
 
         // When
-        List<Device> devices = deviceService.getDevicesByBrand(brand);
+        List<DeviceResponseDTO> devices = deviceService.getDevicesByBrand(brand);
 
         // Then
         assertThat(devices).isNotEmpty().hasSize(1);
-        assertThat(devices.getFirst().getBrand()).isEqualTo(brand);
+        assertThat(devices.getFirst().brand()).isEqualTo(brand);
         then(deviceRepository).should().findByBrand(brand);
     }
 
     @Test
-    @DisplayName("Get devices by state should return list of devices")
+    @DisplayName("Get devices by state should return list of device DTOs")
     void getDevicesByState_ShouldReturnListOfDevices() {
         // Given
         DeviceState state = DeviceState.AVAILABLE;
         given(deviceRepository.findByState(state)).willReturn(List.of(device));
 
         // When
-        List<Device> devices = deviceService.getDevicesByState(state);
+        List<DeviceResponseDTO> devices = deviceService.getDevicesByState(state);
 
         // Then
         assertThat(devices).isNotEmpty().hasSize(1);
-        assertThat(devices.getFirst().getState()).isEqualTo(state);
+        assertThat(devices.getFirst().state()).isEqualTo(state);
         then(deviceRepository).should().findByState(state);
     }
 
@@ -157,7 +167,7 @@ class DeviceServiceImplTest {
         DeviceUpdateDTO updateDTO = new DeviceUpdateDTO("Updated Name", null, DeviceState.IN_USE);
 
         // When
-        Device updatedDevice = deviceService.updateDevice(deviceId, updateDTO);
+        DeviceResponseDTO updatedDevice = deviceService.updateDevice(deviceId, updateDTO);
 
         // Then
         then(deviceRepository).should().findById(deviceId);
@@ -168,6 +178,8 @@ class DeviceServiceImplTest {
         assertThat(capturedDevice.getBrand()).isEqualTo(device.getBrand());
         assertThat(capturedDevice.getState()).isEqualTo(updateDTO.state());
         assertThat(capturedDevice.getId()).isEqualTo(device.getId());
+        
+        assertThat(updatedDevice.name()).isEqualTo(updateDTO.name());
     }
 
     @Test
@@ -217,10 +229,10 @@ class DeviceServiceImplTest {
         DeviceUpdateDTO updateDTO = new DeviceUpdateDTO(null, null, DeviceState.INACTIVE);
 
         // When
-        Device updatedDevice = deviceService.updateDevice(deviceId, updateDTO);
+        DeviceResponseDTO updatedDevice = deviceService.updateDevice(deviceId, updateDTO);
 
         // Then
-        assertThat(updatedDevice.getState()).isEqualTo(DeviceState.INACTIVE);
+        assertThat(updatedDevice.state()).isEqualTo(DeviceState.INACTIVE);
         then(deviceRepository).should().save(device);
     }
 

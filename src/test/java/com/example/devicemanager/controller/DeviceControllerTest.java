@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class DeviceControllerTest {
+class DeviceControllerTest {
 
     @LocalServerPort
     private Integer port;

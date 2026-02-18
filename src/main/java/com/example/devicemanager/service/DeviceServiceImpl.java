@@ -2,7 +2,8 @@ package com.example.devicemanager.service;
 
 import com.example.devicemanager.domain.Device;
 import com.example.devicemanager.domain.DeviceState;
-import com.example.devicemanager.dto.DeviceRequestDTO;
+import com.example.devicemanager.dto.DeviceCreateDTO;
+import com.example.devicemanager.dto.DeviceUpdateDTO;
 import com.example.devicemanager.exception.InvalidDeviceStateException;
 import com.example.devicemanager.repository.DeviceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,11 +24,11 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     @Transactional
-    public Device createDevice(DeviceRequestDTO deviceRequestDTO) {
-        log.debug("Creating new device with name: {} and brand: {}", deviceRequestDTO.getName(), deviceRequestDTO.getBrand());
-        Device device = new Device(deviceRequestDTO.getName(), deviceRequestDTO.getBrand(), deviceRequestDTO.getState());
-        if (deviceRequestDTO.getState() != null) {
-            device.setState(deviceRequestDTO.getState());
+    public Device createDevice(DeviceCreateDTO deviceCreateDTO) {
+        log.debug("Creating new device with name: {} and brand: {}", deviceCreateDTO.name(), deviceCreateDTO.brand());
+        Device device = new Device(deviceCreateDTO.name(), deviceCreateDTO.brand(), deviceCreateDTO.state());
+        if (deviceCreateDTO.state() != null) {
+            device.setState(deviceCreateDTO.state());
         }
         Device savedDevice = deviceRepository.save(device);
         log.info("Device created successfully with ID: {}", savedDevice.getId());
@@ -69,29 +70,29 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     @Transactional
-    public Device updateDevice(UUID id, DeviceRequestDTO deviceRequestDTO) {
-        log.debug("Updating device with ID: {} with payload: {}", id, deviceRequestDTO);
+    public Device updateDevice(UUID id, DeviceUpdateDTO deviceUpdateDTO) {
+        log.debug("Updating device with ID: {} with payload: {}", id, deviceUpdateDTO);
         Device existingDevice = getDeviceById(id);
 
         if (existingDevice.getState() == DeviceState.IN_USE) {
-            if (deviceRequestDTO.getName() != null && !existingDevice.getName().equals(deviceRequestDTO.getName())) {
+            if (deviceUpdateDTO.name() != null && !existingDevice.getName().equals(deviceUpdateDTO.name())) {
                 log.warn("Attempt to update name of IN_USE device with ID: {}", id);
                 throw new InvalidDeviceStateException("Cannot update name when device is IN_USE");
             }
-            if (deviceRequestDTO.getBrand() != null && !existingDevice.getBrand().equals(deviceRequestDTO.getBrand())) {
+            if (deviceUpdateDTO.brand() != null && !existingDevice.getBrand().equals(deviceUpdateDTO.brand())) {
                 log.warn("Attempt to update brand of IN_USE device with ID: {}", id);
                 throw new InvalidDeviceStateException("Cannot update brand when device is IN_USE");
             }
         }
 
-        if (deviceRequestDTO.getName() != null) {
-            existingDevice.setName(deviceRequestDTO.getName());
+        if (deviceUpdateDTO.name() != null) {
+            existingDevice.setName(deviceUpdateDTO.name());
         }
-        if (deviceRequestDTO.getBrand() != null) {
-            existingDevice.setBrand(deviceRequestDTO.getBrand());
+        if (deviceUpdateDTO.brand() != null) {
+            existingDevice.setBrand(deviceUpdateDTO.brand());
         }
-        if (deviceRequestDTO.getState() != null) {
-            existingDevice.setState(deviceRequestDTO.getState());
+        if (deviceUpdateDTO.state() != null) {
+            existingDevice.setState(deviceUpdateDTO.state());
         }
 
         Device updatedDevice = deviceRepository.save(existingDevice);

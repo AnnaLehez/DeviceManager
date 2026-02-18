@@ -2,7 +2,8 @@ package com.example.devicemanager.controller;
 
 import com.example.devicemanager.domain.Device;
 import com.example.devicemanager.domain.DeviceState;
-import com.example.devicemanager.dto.DeviceRequestDTO;
+import com.example.devicemanager.dto.DeviceCreateDTO;
+import com.example.devicemanager.dto.DeviceUpdateDTO;
 import com.example.devicemanager.service.DeviceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,9 @@ public class DeviceController {
     private final DeviceService deviceService;
 
     @PostMapping
-    public ResponseEntity<Device> createDevice(@Valid @RequestBody DeviceRequestDTO deviceRequestDTO) {
-        log.debug("Received request to create device: {}", deviceRequestDTO);
-        Device createdDevice = deviceService.createDevice(deviceRequestDTO);
+    public ResponseEntity<Device> createDevice(@Valid @RequestBody DeviceCreateDTO deviceCreateDTO) {
+        log.debug("Received request to create device: {}", deviceCreateDTO);
+        Device createdDevice = deviceService.createDevice(deviceCreateDTO);
         return new ResponseEntity<>(createdDevice, HttpStatus.CREATED);
     }
 
@@ -59,10 +60,9 @@ public class DeviceController {
     @PatchMapping("/{id}")
     public ResponseEntity<Device> updateDevice(
             @PathVariable UUID id,
-            @RequestBody DeviceRequestDTO deviceRequestDTO) {
-        // Note: @Valid is omitted here to allow partial updates (fields can be null)
+            @Valid @RequestBody DeviceUpdateDTO deviceUpdateDTO) {
         log.debug("Received request to update device with ID: {}", id);
-        Device updatedDevice = deviceService.updateDevice(id, deviceRequestDTO);
+        Device updatedDevice = deviceService.updateDevice(id, deviceUpdateDTO);
         return ResponseEntity.ok(updatedDevice);
     }
 

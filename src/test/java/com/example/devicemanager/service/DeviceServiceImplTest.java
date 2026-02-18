@@ -2,7 +2,8 @@ package com.example.devicemanager.service;
 
 import com.example.devicemanager.domain.Device;
 import com.example.devicemanager.domain.DeviceState;
-import com.example.devicemanager.dto.DeviceRequestDTO;
+import com.example.devicemanager.dto.DeviceCreateDTO;
+import com.example.devicemanager.dto.DeviceUpdateDTO;
 import com.example.devicemanager.exception.InvalidDeviceStateException;
 import com.example.devicemanager.repository.DeviceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,7 +41,7 @@ class DeviceServiceImplTest {
     private ArgumentCaptor<Device> deviceCaptor;
 
     private Device device;
-    private DeviceRequestDTO deviceRequestDTO;
+    private DeviceCreateDTO deviceCreateDTO;
     private UUID deviceId;
 
     @BeforeEach
@@ -48,10 +49,7 @@ class DeviceServiceImplTest {
         deviceId = UUID.randomUUID();
         device = new Device("Test Device", "Test Brand", DeviceState.AVAILABLE);
         
-        deviceRequestDTO = new DeviceRequestDTO();
-        deviceRequestDTO.setName("Test Device");
-        deviceRequestDTO.setBrand("Test Brand");
-        deviceRequestDTO.setState(DeviceState.AVAILABLE);
+        deviceCreateDTO = new DeviceCreateDTO("Test Device", "Test Brand", DeviceState.AVAILABLE);
     }
 
     @Test
@@ -61,15 +59,15 @@ class DeviceServiceImplTest {
         given(deviceRepository.save(any(Device.class))).willReturn(device);
 
         // When
-        Device createdDevice = deviceService.createDevice(deviceRequestDTO);
+        Device createdDevice = deviceService.createDevice(deviceCreateDTO);
 
         // Then
         then(deviceRepository).should().save(deviceCaptor.capture());
         Device capturedDevice = deviceCaptor.getValue();
 
-        assertThat(capturedDevice.getName()).isEqualTo(deviceRequestDTO.getName());
-        assertThat(capturedDevice.getBrand()).isEqualTo(deviceRequestDTO.getBrand());
-        assertThat(capturedDevice.getState()).isEqualTo(deviceRequestDTO.getState());
+        assertThat(capturedDevice.getName()).isEqualTo(deviceCreateDTO.name());
+        assertThat(capturedDevice.getBrand()).isEqualTo(deviceCreateDTO.brand());
+        assertThat(capturedDevice.getState()).isEqualTo(deviceCreateDTO.state());
 
         assertThat(createdDevice).isEqualTo(device);
     }
@@ -156,10 +154,7 @@ class DeviceServiceImplTest {
         given(deviceRepository.findById(deviceId)).willReturn(Optional.of(device));
         given(deviceRepository.save(any(Device.class))).willReturn(device);
 
-        DeviceRequestDTO updateDTO = new DeviceRequestDTO();
-        updateDTO.setName("Updated Name");
-        updateDTO.setName("New Name");
-        updateDTO.setState(DeviceState.IN_USE);
+        DeviceUpdateDTO updateDTO = new DeviceUpdateDTO("Updated Name", null, DeviceState.IN_USE);
 
         // When
         Device updatedDevice = deviceService.updateDevice(deviceId, updateDTO);
@@ -169,9 +164,9 @@ class DeviceServiceImplTest {
         then(deviceRepository).should().save(deviceCaptor.capture());
         Device capturedDevice = deviceCaptor.getValue();
 
-        assertThat(capturedDevice.getName()).isEqualTo(updateDTO.getName());
+        assertThat(capturedDevice.getName()).isEqualTo(updateDTO.name());
         assertThat(capturedDevice.getBrand()).isEqualTo(device.getBrand());
-        assertThat(capturedDevice.getState()).isEqualTo(updateDTO.getState());
+        assertThat(capturedDevice.getState()).isEqualTo(updateDTO.state());
         assertThat(capturedDevice.getId()).isEqualTo(device.getId());
     }
 
@@ -182,8 +177,7 @@ class DeviceServiceImplTest {
         device.setState(DeviceState.IN_USE);
         given(deviceRepository.findById(deviceId)).willReturn(Optional.of(device));
 
-        DeviceRequestDTO updateDTO = new DeviceRequestDTO();
-        updateDTO.setName("New Name");
+        DeviceUpdateDTO updateDTO = new DeviceUpdateDTO("New Name", null, null);
 
         // When / Then
         assertThatThrownBy(() -> deviceService.updateDevice(deviceId, updateDTO))
@@ -201,8 +195,7 @@ class DeviceServiceImplTest {
         device.setState(DeviceState.IN_USE);
         given(deviceRepository.findById(deviceId)).willReturn(Optional.of(device));
 
-        DeviceRequestDTO updateDTO = new DeviceRequestDTO();
-        updateDTO.setBrand("New Brand");
+        DeviceUpdateDTO updateDTO = new DeviceUpdateDTO(null, "New Brand", null);
 
         // When / Then
         assertThatThrownBy(() -> deviceService.updateDevice(deviceId, updateDTO))
@@ -221,8 +214,7 @@ class DeviceServiceImplTest {
         given(deviceRepository.findById(deviceId)).willReturn(Optional.of(device));
         given(deviceRepository.save(any(Device.class))).willReturn(device);
 
-        DeviceRequestDTO updateDTO = new DeviceRequestDTO();
-        updateDTO.setState(DeviceState.INACTIVE);
+        DeviceUpdateDTO updateDTO = new DeviceUpdateDTO(null, null, DeviceState.INACTIVE);
 
         // When
         Device updatedDevice = deviceService.updateDevice(deviceId, updateDTO);

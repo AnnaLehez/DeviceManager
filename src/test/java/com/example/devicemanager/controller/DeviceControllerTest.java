@@ -48,7 +48,8 @@ class DeviceControllerTest {
                 .body("id", notNullValue())
                 .body("name", equalTo("Test Device"))
                 .body("brand", equalTo("Test Brand"))
-                .body("state", equalTo("INACTIVE"));
+                .body("state", equalTo("INACTIVE"))
+                .body("creationTime", notNullValue());
     }
 
     @Test
@@ -65,7 +66,8 @@ class DeviceControllerTest {
                 .statusCode(200)
                 .body(".", hasSize(2))
                 .body("name", hasItems("Device 1", "Device 2"))
-                .body("brand", hasItems("Brand A", "Brand B"));
+                .body("brand", hasItems("Brand A", "Brand B"))
+                .body("creationTime", everyItem(notNullValue()));
     }
 
     @Test
@@ -84,7 +86,8 @@ class DeviceControllerTest {
                 .statusCode(200)
                 .body(".", hasSize(2))
                 .body("name", hasItems("Device 1", "Device 3"))
-                .body("brand", everyItem(equalTo("Brand A")));
+                .body("brand", everyItem(equalTo("Brand A")))
+                .body("creationTime", everyItem(notNullValue()));
     }
 
     @Test
@@ -103,7 +106,8 @@ class DeviceControllerTest {
                 .statusCode(200)
                 .body(".", hasSize(2))
                 .body("name", hasItems("Device 1", "Device 3"))
-                .body("state", everyItem(equalTo("AVAILABLE")));
+                .body("state", everyItem(equalTo("AVAILABLE")))
+                .body("creationTime", everyItem(notNullValue()));
     }
 
     @Test
@@ -119,7 +123,8 @@ class DeviceControllerTest {
         .then()
                 .statusCode(200)
                 .body("id", equalTo(id))
-                .body("name", equalTo("Device to Find"));
+                .body("name", equalTo("Device to Find"))
+                .body("creationTime", notNullValue());
     }
 
     @Test
@@ -148,7 +153,8 @@ class DeviceControllerTest {
         .then()
                 .statusCode(200)
                 .body("name", equalTo("New Name"))
-                .body("brand", equalTo("Old Brand"));
+                .body("brand", equalTo("Old Brand"))
+                .body("creationTime", notNullValue());
     }
 
     @Test

@@ -32,7 +32,7 @@ public class DeviceServiceImpl implements DeviceService {
     public DeviceResponseDTO createDevice(DeviceCreateDTO deviceCreateDTO) {
         log.debug("Creating new device with name: {} and brand: {}", deviceCreateDTO.name(), deviceCreateDTO.brand());
         Device device = deviceMapper.toEntity(deviceCreateDTO);
-        Device savedDevice = deviceRepository.save(device);
+        Device savedDevice = deviceRepository.saveAndFlush(device);
         log.info("Device created successfully with ID: {}", savedDevice.getId());
 
         return deviceMapper.toDTO(savedDevice);

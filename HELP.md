@@ -11,6 +11,16 @@ By default, the project starts in a **Stateless Demo Mode** for zero-config eval
 - **Behavior:** Spins up API + PostgreSQL, creates schema, and populates sample data.
 - **Persistence:** **None.** No Docker volumes are mapped; data is wiped on container destruction for a clean test state.
 
+
+
+**⏳ Startup Time Note:** The initial command may take a few minutes (approx. 3-5 mins) as Docker downloads the base images, Maven resolves dependencies, and the application compiles. Please wait until your terminal displays a success message indicating the database is `Healthy` and the API has started:
+
+```text
+ ✔ Image devicemanager-api  Built                                    
+ ✔ Container devices-db     Healthy                                  
+ ✔ Container devices-api    Started                                    
+```
+
 ---
 
 ### ⌨️ Command Cheat Sheet

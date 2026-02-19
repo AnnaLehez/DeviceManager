@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres-db:
     image: postgres:16-alpine
-    container_name: devices-db
+    container_name: postgres-db
     ports:
       - "5432:5432"
     env_file:

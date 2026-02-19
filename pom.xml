@@ -32,10 +32,10 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
         <spring-framework.version>6.2.11</spring-framework.version>
-        <tomcat.version>10.1.41</tomcat.version>
-        <logback.version>1.5.19</logback.version>
+        <tomcat.version>10.1.42</tomcat.version>
+        <logback.version>1.5.20</logback.version>
         <postgresql.version>42.7.7</postgresql.version>
-        <assertj.version>3.27.3</assertj.version>
+        <assertj.version>3.28.0</assertj.version>
         <json-smart.version>2.5.2</json-smart.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>

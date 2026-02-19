@@ -1,9 +1,9 @@
 ### 🚀 Quick Start & Demo Mode
 
 #### Prerequisites:
-Before running the application, ensure the following ports are available on your host machine:
-*8080*: Used by the `devices-api`.
-*5432*: Used by the `postgres-db`.
+Before starting the application, ensure that the Docker daemon is running and the following host ports are available:
+* **8080**: Used by the Spring Boot API `devices-api`.
+* **5432**: Used by the PostgreSQL Database `postgres-db`.
 
 By default, the project starts in a **Stateless Demo Mode** for zero-config evaluation.
 
@@ -28,9 +28,17 @@ By default, the project starts in a **Stateless Demo Mode** for zero-config eval
 ---
 ## 📖 Useful Endpoints
 
-- **API Base:** `http://localhost:8080/api/v1/devices`
-- **Documentation:** `http://localhost:8080/swagger-ui.html`
-- **Health Check:** `http://localhost:8080/actuator/health`
+
+- **API Directory (Start Page):** [`http://localhost:8080/`](http://localhost:8080/)
+- **API Endpoints:** [`http://localhost:8080/api/v1/devices`](http://localhost:8080/api/v1/devices)
+- **Swagger UI:** [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/swagger-ui.html)
+
+#### Monitoring
+
+- **Application Health (with DB status):** [`http://localhost:8080/actuator/health`](http://localhost:8080/actuator/health)
+- **Kubernetes Liveness Probe:** [`http://localhost:8080/actuator/health/liveness`](http://localhost:8080/actuator/health/liveness)
+- **Kubernetes Readiness Probe:** [`http://localhost:8080/actuator/health/readiness`](http://localhost:8080/actuator/health/readiness)
+- **Prometheus Metrics Export:** [`http://localhost:8080/actuator/prometheus`](http://localhost:8080/actuator/prometheus)
 ---
 ### ⚙️ Architecture Highlights
 

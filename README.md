@@ -22,11 +22,11 @@ Ensure Docker is installed and the following host ports are available:
 
 > **Security Note:** For the purpose of this technical evaluation, an `.env` file containing demo credentials has been intentionally committed. In a production environment, this file is git-ignored and secrets are managed via a secure vault.
 ---
-## 🚀 Quick Start & Run Modes
+## 🚀 Quick Start 
 
 The application uses Spring Profiles (`APP_PROFILE`) to manage its data state.
 
-### 1. Demo Mode (Default)
+####  Demo Mode (Default)
 
 Starts the app and populates the database with sample data using Flyway
 
@@ -34,18 +34,30 @@ Starts the app and populates the database with sample data using Flyway
 docker compose up --build -d
 ```
 
-- **API Endpoints:** `http://localhost:8080/api/v1/devices`
-
-- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
-
-### 2. Clean / Production Mode
+#####  Clean / Production Mode
 
 Starts the application with the full schema but **zero data**.
 
 ```
 APP_PROFILE=prod docker compose up --build -d
 ```
+###  Application Endpoints
+
+- **API Directory (Start Page):** [`http://localhost:8080/`](http://localhost:8080/)
+- **API Endpoints:** [`http://localhost:8080/api/v1/devices`](http://localhost:8080/api/v1/devices)
+- **Swagger UI:** [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/swagger-ui.html)
+
+
+### Observability & Monitoring
+The application is configured with enterprise-grade monitoring and Cloud-Native health probes. Once the application is running, you can access the following operational endpoints:
+
+- **Application Health (with DB status):** [`http://localhost:8080/actuator/health`](http://localhost:8080/actuator/health)
+- **Kubernetes Liveness Probe:** [`http://localhost:8080/actuator/health/liveness`](http://localhost:8080/actuator/health/liveness)
+- **Kubernetes Readiness Probe:** [`http://localhost:8080/actuator/health/readiness`](http://localhost:8080/actuator/health/readiness)
+- **Prometheus Metrics Export:** [`http://localhost:8080/actuator/prometheus`](http://localhost:8080/actuator/prometheus)
+
 ---
+
 ## 🏗 Key Architectural Features
 
 - **Concurrency Control:** Implements **Optimistic Locking** (`@Version`) to prevent "Lost Updates" when multiple users edit the same device simultaneously.
